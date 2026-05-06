@@ -24,9 +24,24 @@ jobs:
     - name: Build Docker image
       run: docker build -t trufi-server-planner:test .
 
+    - name: Stage runtime mounts for tests
+      run: |
+        # data/ and web/ are gitignored — populate from the committed example
+        # feed and a placeholder so the container can resolve both at runtime.
+        mkdir -p data web
+        cp example.gtfs.zip data/gtfs.zip
+        # Test 'Web app serves HTML' looks for the substring "Trufi".
+        echo '<!doctype html><title>Trufi Server Planner</title>' > web/index.html
+
     - name: Start server
       run: |
-        docker run -d -p 9090:8080 --name trufi-test trufi-server-planner:test
+        # docker-compose mounts ./data and ./web in production; CI mirrors
+        # that since the Dockerfile intentionally does not bake either into
+        # the image (so the same image works for any city via volume mount).
+        docker run -d -p 9090:8080 --name trufi-test \
+          -v "${{ github.workspace }}/data:/app/data:ro" \
+          -v "${{ github.workspace }}/web:/app/web:ro" \
+          trufi-server-planner:test
         sleep 20
 
     - name: Run integration tests

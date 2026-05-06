@@ -16,12 +16,13 @@ import 'package:trufi_server_planner/handlers/docs.dart';
 
 Future<void> main() async {
   final port = int.tryParse(Platform.environment['PORT'] ?? '8080') ?? 8080;
+  final gtfsPath = Platform.environment['GTFS_FILE'] ?? 'data/gtfs.zip';
 
   print('=== Trufi Server Planner ===');
-  print('Loading GTFS data...');
+  print('Loading GTFS data from $gtfsPath...');
 
   try {
-    gtfsData = await GtfsParser.parseFromFile('gtfs_data.zip');
+    gtfsData = await GtfsParser.parseFromFile(gtfsPath);
     spatialIndex = GtfsSpatialIndex(gtfsData.stops);
     routeIndex = GtfsRouteIndex(gtfsData);
     routingService = GtfsRoutingService(
