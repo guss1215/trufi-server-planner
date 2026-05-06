@@ -226,19 +226,28 @@ Content-Type: application/json
 
 ### Variables de Entorno
 
-- `PORT`: Puerto del servidor (default: 8080)
+- `PORT`: puerto del servidor (default: `8080`).
+- `GTFS_FILE`: ruta del archivo GTFS dentro del proceso (default: `data/gtfs.zip`).
 
 ### Archivo GTFS
 
-El servidor usa el archivo `gtfs_data.zip` que debe estar en la raíz del proyecto. Para cambiar los datos:
+El servidor lee el feed desde `data/gtfs.zip` (relativo al cwd del proceso, o `/app/data/gtfs.zip` en docker). El directorio `data/` está gitignoreado: cada deploy/dev pone su propio feed allí.
 
-1. Reemplazar `gtfs_data.zip` con tu archivo GTFS
-2. Reiniciar el servidor
+Para cambiar los datos:
 
 ```bash
-cp /path/to/new/gtfs.zip gtfs_data.zip
+# Generá el feed con el builder (una vez):
+cd ../trufi-app/tools/gtfs-bolivia-cochabamba
+npm install && npm start
+
+# Copialo:
+cp ../trufi-app/tools/gtfs-bolivia-cochabamba/out/cochabamba.gtfs.zip data/gtfs.zip
+
+# Reiniciá el contenedor:
 docker-compose restart planner
 ```
+
+El repo incluye `example.gtfs.zip` (3.6MB, Cochabamba) como feed de referencia para tests/dev. CI lo copia a `data/gtfs.zip` antes de correr los integration tests.
 
 ## Integración con trufi-server
 

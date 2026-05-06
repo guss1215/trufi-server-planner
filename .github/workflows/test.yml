@@ -24,9 +24,21 @@ jobs:
     - name: Build Docker image
       run: docker build -t trufi-server-planner:test .
 
+    - name: Stage GTFS for tests
+      run: |
+        # data/ is gitignored — populate it from the committed example feed
+        # so the container can read /app/data/gtfs.zip at runtime.
+        mkdir -p data
+        cp example.gtfs.zip data/gtfs.zip
+
     - name: Start server
       run: |
-        docker run -d -p 9090:8080 --name trufi-test trufi-server-planner:test
+        # docker-compose mounts ./data in production; CI mirrors that since
+        # the Dockerfile intentionally does not bake the GTFS into the image
+        # (so the same image works for any city via volume mount).
+        docker run -d -p 9090:8080 --name trufi-test \
+          -v "${{ github.workspace }}/data:/app/data:ro" \
+          trufi-server-planner:test
         sleep 20
 
     - name: Run integration tests
