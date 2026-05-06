@@ -3,11 +3,12 @@ import 'package:http/http.dart' as http;
 import 'package:test/test.dart';
 
 const baseUrl = 'http://localhost:9090';
+const apiBase = '$baseUrl/api';
 
 void main() {
   group('Trufi Server Planner Integration Tests', () {
     test('Health check returns status and GTFS data', () async {
-      final response = await http.get(Uri.parse('$baseUrl/health'));
+      final response = await http.get(Uri.parse('$apiBase/health'));
 
       expect(response.statusCode, 200);
       final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -26,7 +27,7 @@ void main() {
     });
 
     test('List stops returns data', () async {
-      final response = await http.get(Uri.parse('$baseUrl/stops?limit=5'));
+      final response = await http.get(Uri.parse('$apiBase/stops?limit=5'));
 
       expect(response.statusCode, 200);
       final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -55,7 +56,7 @@ void main() {
       final lon = -66.1570;
 
       final response = await http.get(
-        Uri.parse('$baseUrl/stops/nearby?lat=$lat&lon=$lon&maxResults=5&maxDistance=500'),
+        Uri.parse('$apiBase/stops/nearby?lat=$lat&lon=$lon&maxResults=5&maxDistance=500'),
       );
 
       expect(response.statusCode, 200);
@@ -80,7 +81,7 @@ void main() {
     });
 
     test('List routes returns data', () async {
-      final response = await http.get(Uri.parse('$baseUrl/routes'));
+      final response = await http.get(Uri.parse('$apiBase/routes'));
 
       expect(response.statusCode, 200);
       final data = jsonDecode(response.body) as Map<String, dynamic>;
@@ -108,7 +109,7 @@ void main() {
       });
 
       final response = await http.post(
-        Uri.parse('$baseUrl/plan'),
+        Uri.parse('$apiBase/plan'),
         headers: {'Content-Type': 'application/json'},
         body: requestBody,
       );
@@ -158,7 +159,7 @@ void main() {
       });
 
       final response = await http.post(
-        Uri.parse('$baseUrl/plan'),
+        Uri.parse('$apiBase/plan'),
         headers: {'Content-Type': 'application/json'},
         body: requestBody,
       );
@@ -183,7 +184,7 @@ void main() {
     });
 
     test('CORS headers are present', () async {
-      final response = await http.get(Uri.parse('$baseUrl/health'));
+      final response = await http.get(Uri.parse('$apiBase/health'));
 
       expect(response.headers['access-control-allow-origin'], '*');
       expect(response.headers['access-control-allow-methods'], isNotNull);

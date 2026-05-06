@@ -30,7 +30,8 @@ jobs:
         # feed and a placeholder so the container can resolve both at runtime.
         mkdir -p data web
         cp example.gtfs.zip data/gtfs.zip
-        echo '<!doctype html><title>trufi-server-planner</title>' > web/index.html
+        # Test 'Web app serves HTML' looks for the substring "Trufi".
+        echo '<!doctype html><title>Trufi Server Planner</title>' > web/index.html
 
     - name: Start server
       run: |
