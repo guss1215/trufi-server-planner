@@ -54,10 +54,24 @@ Future<void> main() async {
     ..get('/api/openapi.json', openApiSpecHandler);
 
   // Static file handler for Flutter web app
-  final staticHandler = createStaticHandler(
+  final webHandler = createStaticHandler(
     'web',
     defaultDocument: 'index.html',
   );
+
+  // SPA fallback: when a path without a file extension 404s, serve
+  // index.html so the Flutter client-side router can resolve deep
+  // links (e.g. /routes, /stops/123) on hard reload.
+  Future<Response> staticHandler(Request req) async {
+    final res = await webHandler(req);
+    if (res.statusCode != 404 || req.url.path.contains('.')) return res;
+    return webHandler(Request(
+      'GET',
+      req.requestedUri.replace(path: '/'),
+      headers: req.headers,
+      context: req.context,
+    ));
+  }
 
   // Cascade: API first, then static files
   final handler = Pipeline()
