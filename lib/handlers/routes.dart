@@ -5,7 +5,35 @@ import 'package:shelf/shelf.dart';
 import '../state.dart';
 
 Response listRoutesHandler(Request request) {
-  final routes = gtfsData.routes.values.map((r) => r.toJson()).toList();
+  final agencyNameById = {
+    for (final a in gtfsData.agencies) a.id: a.name,
+  };
+
+  final routes = gtfsData.routes.values.map((r) {
+    final patterns = routeIndex.getPatternsForRoute(r.id).map((p) {
+      final firstStop = p.stopIds.isNotEmpty
+          ? gtfsData.stops[p.stopIds.first]?.name
+          : null;
+      final lastStop = p.stopIds.isNotEmpty
+          ? gtfsData.stops[p.stopIds.last]?.name
+          : null;
+      return {
+        'id': p.id,
+        'headsign': p.headsign,
+        'firstStop': firstStop,
+        'lastStop': lastStop,
+      };
+    }).toList();
+
+    return {
+      ...r.toJson(),
+      // Enrichment: optional fields old clients ignore, new clients use to
+      // build one entry per pattern (matching the local mode behavior).
+      'agencyName':
+          r.agencyId != null ? agencyNameById[r.agencyId] : null,
+      'patterns': patterns,
+    };
+  }).toList();
 
   return Response.ok(
     jsonEncode({
