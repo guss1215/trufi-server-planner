@@ -220,6 +220,12 @@ const _openApiSpec = {
                       'lon': {'type': 'number', 'example': -66.147902},
                     },
                   },
+                  'maxResults': {
+                    'type': 'integer',
+                    'description':
+                        'Maximum paths to return (1-20). Defaults to 20.',
+                    'example': 20,
+                  },
                 },
               },
             },

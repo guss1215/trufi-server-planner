@@ -22,11 +22,20 @@ Future<Response> planHandler(Request request) async {
       );
     }
 
+    // Honor the client's requested result count, bounded to keep responses
+    // small. Older clients that don't send maxResults get the default.
+    final maxResults = ((json['maxResults'] as num?)?.toInt() ?? 20).clamp(
+      1,
+      20,
+    );
+
     final paths = routingService.findRoutes(
       origin: LatLng(fromLat, fromLon),
       destination: LatLng(toLat, toLon),
       maxWalkDistance: 500,
-      maxResults: 5,
+      maxResults: maxResults,
+      maxDirects: maxResults,
+      maxTransferPaths: maxResults,
     );
 
     if (paths.isEmpty) {
